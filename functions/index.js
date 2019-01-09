@@ -9,36 +9,30 @@ const firebaseApp = firebase.initializeApp(
 
   // Get a reference to the database service
 var database = firebase.database();
-function getCurrentData(){
-    const ref = firebaseApp.database().ref('data');
-    return ref.once('value').then(snap=>snap.val());
 
-};
 
 const app = express();
 app.engine('hbs', engine.handlebars);
 app.set('views', './views');
 app.set('view engine', 'hbs');
 
-app.get('/', (request, response) => {
-    getCurrentData().then(data =>{
-        var obj = {
-            SensorDatapoint:{
-                ID: "identifier"
-            }
-        };    
-        database.push(obj);
+app.get('/time', (request, response) => {
 
-        response.render('index', {data});
-    });
-
-
+    response.send(`${Date.now()}`);
 
 
 });
-app.get('/dataUpload', (request, response) => {
 
+app.post('/dataUpload', (request, response) => {
 
+    var dataRef = database.ref("datapoints/");
+    console.log(request);
+    var dataPoint = request.body;
+    dataPoint.timestamp = `${Date.now()}`;
+    console.log(JSON.stringify(dataPoint));
+    var dbDatapointRef = dataRef.push();
+    dbDatapointRef.set(dataPoint);
+    response.send("SUCCESSFUL DATA UPLOAD");
 
 });
 
